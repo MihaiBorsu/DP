@@ -11,6 +11,7 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 
+
 int are_you_new_user(){
   puts("Are you new user? Y/N");
   char c = getchar();
@@ -93,6 +94,23 @@ void alter_ip_and_mac(char *username, char *ip, char *mac){
 }
 
 
+/*
+Am gandit treaba în felul următor (așa e și în main-ul de mai jos comentat):
+1) ești user nou?
+DA:
+  insert user
+  insert pass
+  retrive ip
+  insert to database (it is a file we write in)
+NU:
+  insert user
+  insert pass
+  check user and pass
+  retrive ip
+  alter ip in the database
+*/
+
+
 // int main(void){
 //   if are_you_new_user(){
 //     username = insert_username();
@@ -104,7 +122,6 @@ void alter_ip_and_mac(char *username, char *ip, char *mac){
 
 //     password = insert_password();
 //     ip = retrive_ip();
-//     mac = retrive_mac();
 //     insert_to_database(username,password,ip,mac);
 //   }
 
@@ -123,7 +140,6 @@ void alter_ip_and_mac(char *username, char *ip, char *mac){
 
 //     puts("You are now logged in");
 //     ip = retrive_ip();
-//     mac = retrive_mac();
 
 //     alter_ip_and_mac(username,ip,mac); //update with the new ip and mac
 //   }
