@@ -1,94 +1,142 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sqlite3.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
 
-sqlite3 *db;
-int rc;
-
-static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
-   int i;
-   for(i = 0; i<argc; i++) {
-      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-   }
-   printf("\n");
-   return 0;
+int are_you_new_user(){
+  puts("Are you new user? Y/N");
+  char c = getchar();
+  if (c == 'Y' || c == 'y')
+    return 1;
+  if (c == 'N' || c == 'n')
+    return 0;
+  return -1;
 }
 
-static int callback2(void *data, int argc, char **argv, char **azColName) {
-   int i;
-   fprintf(stderr, "%s: ", (const char*)data);
-   for(i = 0; i<argc; i++) {
-      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-   }
-   printf("\n");
-   return 0;
-}
+char *insert_username(){
+  char *username;
+  int n;
+  puts("Insert username:");
 
-void create_table(){
-  char *zErrMsg = 0;
-  char *sql = "CREATE TABLE USERS("	     \
-      "ID INT PRIMARY KEY NOT NULL," \
-      "NAME TEXT NOT NULL," \
-      "PASSWORD TEXT NOT NULL," \
-      "IP CHAR(16) NOT NULL," \
-      "MAC CHAR(50) NOT NULL );";
-
-  rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
-  if( rc != SQLITE_OK ) {
-      fprintf(stderr, "SQL error: %s\n", zErrMsg);
-      sqlite3_free(zErrMsg);
-  } else {
-      fprintf(stdout, "Table created successfully\n");
+  n = scanf("%ms", &username);
+  if (n == 1){
+    return username;
   }
-  sqlite3_close(db);
+  puts("Error scanning the username");
+  return NULL;
 
 }
 
-void insert(){
-   char *zErrMsg = 0;
+char *insert_password(){
+  char *password;
+  int n;
+  puts("Insert password:");
 
-  char *sql = "INSERT INTO USERS (ID,NAME,PASSWORD,IP,MAC) " \
-    "VALUES (5, 'Paul', '32', 'California', '20000.00' ); ";
-
-
-  
-  
-  rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
-  if( rc != SQLITE_OK ) {
-      fprintf(stderr, "SQL error: %s\n", zErrMsg);
-      sqlite3_free(zErrMsg);
-  } else {
-      fprintf(stdout, "Records created successfully\n");
+  n = scanf("%ms", &password);
+  if (n == 1){
+    return password;
   }
+  puts("Error scanning the password");
+  return NULL;
 }
 
-static void select2(){
-  char *zErrMsg = 0;
-  const char* data = "Callback function called";
-   char *sql = "SELECT * from USERS";
-   /* Execute SQL statement */
-   rc = sqlite3_exec(db, sql, callback2, (void*)data, &zErrMsg);
-   if( rc != SQLITE_OK ) {
-      fprintf(stderr, "SQL error: %s\n", zErrMsg);
-      sqlite3_free(zErrMsg);
-   } else {
-      fprintf(stdout, "Operation done successfully\n");
+void check_host_name(int hostname) { //This function returns host name for local computer
+   if (hostname == -1) {
+      perror("gethostname");
+      exit(1);
    }
 }
 
-int main(void) {
-  char *zErrMsg = 0;
-  rc = sqlite3_open("test.db", &db);
-   
-  if( rc ) {
-     fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-  }
-  else {
-     fprintf(stderr, "Opened database successfully\n");
-  }
-
-  
-  //create_table();
-  insert();
-  select2();
+void check_host_entry(struct hostent * hostentry) { //find host info from host name
+   if (hostentry == NULL) {
+      perror("gethostbyname");
+      exit(1);
+   }
 }
+
+char *retrive_ip(){
+  char host[256];
+  char *ip;
+  struct hostent *host_entry;
+  int hostname;
+
+  hostname = gethostname(host, sizeof(host)); //find the host name
+  check_host_name(hostname);
+  host_entry = gethostbyname(host); //find host information
+  check_host_entry(host_entry);
+  ip = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+  return ip;
+}
+
+int check_username_existance(char *username){
+
+}
+
+int check_password(char *username,char *password){
+
+}
+
+void insert_to_database(char *username, char *password, char *ip, char *mac){
+
+}
+
+void alter_ip_and_mac(char *username, char *ip, char *mac){
+
+}
+
+
+// int main(void){
+//   if are_you_new_user(){
+//     username = insert_username();
+
+//     while check_username_existance(username){
+//       puts("username already exists, please try another username");
+//       username = insert_username();
+//     }
+
+//     password = insert_password();
+//     ip = retrive_ip();
+//     mac = retrive_mac();
+//     insert_to_database(username,password,ip,mac);
+//   }
+
+//   else{
+//     username = insert_username();
+//     while !check_username_existance(username){
+//       puts("username does not exists in the database, please try again.");
+//       username = insert_username();
+//     }
+
+//     password = insert_password();
+//     while !check_password(username,password){
+//       puts("Wrong password, please try again");
+//       password = insert_password();
+//     }s
+
+//     puts("You are now logged in");
+//     ip = retrive_ip();
+//     mac = retrive_mac();
+
+//     alter_ip_and_mac(username,ip,mac); //update with the new ip and mac
+//   }
+
+int main(int argc, char const *argv[]){
+  printf("%d\n",are_you_new_user());
+  char *username = insert_username();
+  char *password = insert_password();
+  char *ip = retrive_ip();
+  puts(ip);
+  //retrive_mac();
+  mac_eth0();
+  return 0;
+}
+
+
