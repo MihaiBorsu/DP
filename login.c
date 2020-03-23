@@ -77,20 +77,86 @@ char *retrive_ip(){
   return ip;
 }
 
-int check_username_existance(char *username){
+int check_username_existance(FILE *db,char *username){
+  db = fopen("db.txt","r");
+  char line[256];
 
+  int i=0;
+  while(fgets(line,sizeof(line),db)){
+    if (i%4 == 0)
+      if (strcmp(line,username) - '\n' == 0){
+        fclose(db);
+        return 1;
+      }
+    i++;
+  }
+
+  fclose(db);
+  return 0;
 }
 
-int check_password(char *username,char *password){
+int check_password(FILE *db,char *username,char *password){
+  db = fopen("db.txt","r");
+  char line[256];
 
+  int i=0;
+  while(fgets(line,sizeof(line),db)){
+    if (i%4 == 0)
+      if (strcmp(line,username) - '\n' == 0){
+        fgets(line,sizeof(line),db);
+        if (strcmp(line,password) - '\n' == 0){
+          fclose(db);
+          return 1;
+        }
+      }
+
+    i++;
+  }
+
+  fclose(db);
+  return 0;
 }
 
-void insert_to_database(char *username, char *password, char *ip, char *mac){
+void insert_to_database(FILE *db,char *username, char *password, char *ip){
+  char *new_string = malloc(sizeof(char) * (strlen(username) + strlen(password) + strlen(ip) + 6));
+  //new_string = "\0";
 
+  strcat(new_string,username);
+  strcat(new_string,"\n");
+  strcat(new_string,password);
+  strcat(new_string,"\n");
+  strcat(new_string,ip);
+  strcat(new_string,"\n");
+
+  db = fopen("db.txt","a+");
+
+  if (db == NULL){
+    puts("Error opening the file pointer (insert_to_database function)");
+    return;
+  }
+
+  fprintf(db, "%s\n", new_string);
+
+  fclose(db);
+  free(new_string);
 }
 
-void alter_ip_and_mac(char *username, char *ip, char *mac){
+void alter_ip(char *username, char *ip){
+  db = fopen("db.txt","r");
+  char line[256];
 
+  int i=0;
+  while(fgets(line,sizeof(line),db)){
+    if (i%4 == 0)
+      if (strcmp(line,username) - '\n' == 0){
+        fclose(db);
+        return 1;
+      }
+    i++;
+  }
+
+  fclose(db);
+  return 0;
 }
 
 
@@ -145,13 +211,15 @@ NU:
 //   }
 
 int main(int argc, char const *argv[]){
-  printf("%d\n",are_you_new_user());
+  /*printf("%d\n",are_you_new_user());
   char *username = insert_username();
   char *password = insert_password();
-  char *ip = retrive_ip();
-  puts(ip);
-  //retrive_mac();
-  mac_eth0();
+  char *ip = retrive_ip();*/
+
+  FILE *db;
+  //insert_to_database(db,username,password,ip);
+  //printf("%d\n", check_username_existance(db,"Andreeaea"));
+  printf("%d\n", check_password(db,"Mihai","G0585badcxz"));
   return 0;
 }
 
